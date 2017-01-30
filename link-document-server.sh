@@ -23,6 +23,7 @@ fi
 
 if [ "${DOCUMENT_SERVER_ENABLED}" == "true" ]; then
         if [ -f ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice ]; then
+			sed -e '/{{DOCUMENT_SERVER_HOST_ADDR}}/ s/#//' -i ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice
             sed 's,{{DOCUMENT_SERVER_HOST_ADDR}},'"${DOCUMENT_SERVER_PROTOCOL}:\/\/${DOCUMENT_SERVER_HOST}"',' -i ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice
         fi
 
@@ -57,7 +58,11 @@ if [ "${DOCUMENT_SERVER_ENABLED}" == "true" ]; then
 
         if [ -n "${DOCKER_ONLYOFFICE_SUBNET}" ] && [ -n "${SERVER_HOST}" ]; then
                 RedisData="${RedisData},\"portal\":\"http://${SERVER_HOST}\"";
-    fi
+		fi
 
     redis-cli  PUBLISH asc:channel:ASC.Web.Core.Files.DocServiceUrl "{\"CacheId\":\"140ab4e4-17d0-47dd-ba64-91f09bf20a72\",\"Object\":{\"Data\":{$RedisData}},\"Action\":7}"
+else
+ if [ -f ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice ]; then
+	sed -e '/{{DOCUMENT_SERVER_HOST_ADDR}}/ s/^#*/#/' -i /app/onlyoffice/setup/config/nginx/onlyoffice
+ fi
 fi
