@@ -40,11 +40,6 @@ SYSCONF_TOOLS_DIR="/app/onlyoffice/setup/assets/tools"
 
 ONLYOFFICE_SERVICES_INTERNAL_HOST=${ONLYOFFICE_SERVICES_PORT_9865_TCP_ADDR:-${ONLYOFFICE_SERVICES_INTERNAL_HOST}}
 ONLYOFFICE_SERVICES_EXTERNAL=false
-DOCUMENT_SERVER_ENABLED=false
-
-DOCUMENT_SERVER_HOST=${DOCUMENT_SERVER_HOST:-""};
-DOCUMENT_SERVER_PROTOCOL=${DOCUMENT_SERVER_PROTOCOL:-"http"};
-DOCUMENT_SERVER_API_URL="\/OfficeWeb\/apps\/api\/documents\/api\.js";
 
 CONTROL_PANEL_ENABLED=false
 MAIL_SERVER_ENABLED=false
@@ -56,6 +51,10 @@ MYSQL_SERVER_DB_NAME=${MYSQL_SERVER_DB_NAME:-"onlyoffice"}
 MYSQL_SERVER_USER=${MYSQL_SERVER_USER:-"root"}
 MYSQL_SERVER_PASS=${MYSQL_SERVER_PASS:-""}
 MYSQL_SERVER_EXTERNAL=false;
+
+export $ONLYOFFICE_MONOSERVE_COUNT
+export $ONLYOFFICE_DIR
+export $SYSCONF_TEMPLATES_DIR
 
 mkdir -p "${SSL_CERTIFICATES_DIR}"
 
@@ -122,14 +121,6 @@ if [ ${ONLYOFFICE_SERVICES_INTERNAL_HOST} ]; then
     		sleep 1
 	done
 
-fi
-
-if [ ${DOCUMENT_SERVER_HOST} ]; then
-	DOCUMENT_SERVER_ENABLED=true;
-	DOCUMENT_SERVER_API_URL="${DOCUMENT_SERVER_PROTOCOL}://${DOCUMENT_SERVER_HOST}${DOCUMENT_SERVER_API_URL}";
-elif [ ${DOCUMENT_SERVER_PORT_80_TCP_ADDR} ]; then
-	DOCUMENT_SERVER_ENABLED=true;
-	DOCUMENT_SERVER_HOST=${DOCUMENT_SERVER_PORT_80_TCP_ADDR};
 fi
 
 if [ ${MYSQL_SERVER_HOST} != "localhost" ]; then
@@ -404,32 +395,7 @@ if ! grep -q "name=\"textindex\"" ${ONLYOFFICE_SERVICES_DIR}/TeamLabSvc/TeamLabS
 	sed -i 's/.*<add\s*name="default"\s*connectionString=.*/&\n<add name="textindex" connectionString="Server=localhost;Port=9306;Pooling=True;Character Set=utf8;AutoEnlist=false" providerName="MySql.Data.MySqlClient"\/>/' ${ONLYOFFICE_SERVICES_DIR}/TeamLabSvc/TeamLabSvc.exe.Config; 
 fi
 
-if [ "${DOCUMENT_SERVER_ENABLED}" == "true" ]; then
-    sed 's,{{DOCUMENT_SERVER_HOST_ADDR}},'"${DOCUMENT_SERVER_PROTOCOL}:\/\/${DOCUMENT_SERVER_HOST}"',' -i ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice
-
-    # change web.appsettings link to editor
-    sed '/files\.docservice\.url\.converter/s!\(value\s*=\s*\"\)[^\"]*\"!\1'${DOCUMENT_SERVER_PROTOCOL}':\/\/'${DOCUMENT_SERVER_HOST}'\/ConvertService\.ashx\"!' -i  ${ONLYOFFICE_ROOT_DIR}/web.appsettings.config
-    sed '/files\.docservice\.url\.api/s!\(value\s*=\s*\"\)[^\"]*\"!\1'${DOCUMENT_SERVER_API_URL}'\"!' -i ${ONLYOFFICE_ROOT_DIR}/web.appsettings.config
-    sed '/files\.docservice\.url\.storage/s!\(value\s*=\s*\"\)[^\"]*\"!\1'${DOCUMENT_SERVER_PROTOCOL}':\/\/'${DOCUMENT_SERVER_HOST}'\/FileUploader\.ashx\"!' -i ${ONLYOFFICE_ROOT_DIR}/web.appsettings.config
-    sed '/files\.docservice\.url\.command/s!\(value\s*=\s*\"\)[^\"]*\"!\1'${DOCUMENT_SERVER_PROTOCOL}':\/\/'${DOCUMENT_SERVER_HOST}'\/coauthoring\/CommandService\.ashx\"!' -i ${ONLYOFFICE_ROOT_DIR}/web.appsettings.config
-
-    if [ -n "${DOCKER_ONLYOFFICE_SUBNET}" ] && [ -n "${SERVER_HOST}" ]; then
-	sed '/files\.docservice\.url\.portal/s!\(value\s*=\s*\"\)[^\"]*\"!\1http:\/\/'${SERVER_HOST}'\"!' -i ${ONLYOFFICE_ROOT_DIR}/web.appsettings.config
-	
-    fi
-
-
-    if ! grep -q "files\.docservice\.url\.command" ${ONLYOFFICE_ROOT_DIR}/web.appsettings.config; then
-          sed '/files\.docservice\.url\.storage/a <add key=\"files\.docservice\.url\.command\" value=\"'${DOCUMENT_SERVER_PROTOCOL}':\/\/'${DOCUMENT_SERVER_HOST}'\/coauthoring\/CommandService\.ashx\" \/>/' -i ${ONLYOFFICE_ROOT_DIR}/web.appsettings.config
-    else
-          sed '/files\.docservice\.url\.command/s!\(value\s*=\s*\"\)[^\"]*\"!\1'${DOCUMENT_SERVER_PROTOCOL}':\/\/'${DOCUMENT_SERVER_HOST}'\/coauthoring\/CommandService\.ashx\"!' -i ${ONLYOFFICE_ROOT_DIR}/web.appsettings.config
-    fi
-	
-	mysql_scalar_exec "REPLACE INTO webstudio_settings (TenantID, ID, UserID, Data) VALUES (-1, 'a3acbfc4-155b-4ea8-8367-bbc586319553', '00000000-0000-0000-0000-000000000000', '{\"NewScheme\":true,\"RequestedScheme\":true}');";
-else
-	# delete documentserver section
-	sed '/coauthoring/,/}$/d' -i ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice
-fi
+./link-document-server.sh ${DOCUMENT_SERVER_PORT_80_TCP_ADDR}
 
 if [ "${MAIL_SERVER_ENABLED}" == "true" ]; then
 
