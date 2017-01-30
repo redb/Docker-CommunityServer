@@ -51,7 +51,7 @@ if [ "${DOCUMENT_SERVER_ENABLED}" == "true" ]; then
         done
 
         RedisData="\"converter\":\"${DOCUMENT_SERVER_PROTOCOL}://${DOCUMENT_SERVER_HOST}/ConvertService.ashx\"";
-        RedisData="${RedisData},\"api\":\"${DOCUMENT_SERVER_PROTOCOL}://${DOCUMENT_SERVER_HOST}/OfficeWeb/apps/api/documents/api.js\"";
+        RedisData="${RedisData},\"api\":\"/OfficeWeb/apps/api/documents/api.js\"";
         RedisData="${RedisData},\"storage\":\"${DOCUMENT_SERVER_PROTOCOL}://${DOCUMENT_SERVER_HOST}/FileUploader.ashx\"";
         RedisData="${RedisData},\"command\":\"${DOCUMENT_SERVER_PROTOCOL}://${DOCUMENT_SERVER_HOST}/coauthoring/CommandService.ashx\"";
 
