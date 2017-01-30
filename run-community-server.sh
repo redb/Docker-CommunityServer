@@ -52,9 +52,9 @@ MYSQL_SERVER_USER=${MYSQL_SERVER_USER:-"root"}
 MYSQL_SERVER_PASS=${MYSQL_SERVER_PASS:-""}
 MYSQL_SERVER_EXTERNAL=false;
 
-export $ONLYOFFICE_MONOSERVE_COUNT
-export $ONLYOFFICE_DIR
-export $SYSCONF_TEMPLATES_DIR
+export ONLYOFFICE_MONOSERVE_COUNT
+export ONLYOFFICE_DIR
+export SYSCONF_TEMPLATES_DIR
 
 mkdir -p "${SSL_CERTIFICATES_DIR}"
 
@@ -395,7 +395,7 @@ if ! grep -q "name=\"textindex\"" ${ONLYOFFICE_SERVICES_DIR}/TeamLabSvc/TeamLabS
 	sed -i 's/.*<add\s*name="default"\s*connectionString=.*/&\n<add name="textindex" connectionString="Server=localhost;Port=9306;Pooling=True;Character Set=utf8;AutoEnlist=false" providerName="MySql.Data.MySqlClient"\/>/' ${ONLYOFFICE_SERVICES_DIR}/TeamLabSvc/TeamLabSvc.exe.Config; 
 fi
 
-./link-document-server.sh ${DOCUMENT_SERVER_PORT_80_TCP_ADDR}
+/app/onlyoffice/link-document-server.sh ${DOCUMENT_SERVER_PORT_80_TCP_ADDR}
 
 if [ "${MAIL_SERVER_ENABLED}" == "true" ]; then
 
