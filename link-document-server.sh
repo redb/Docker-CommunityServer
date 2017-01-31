@@ -25,7 +25,11 @@ if [ "${DOCUMENT_SERVER_ENABLED}" == "true" ]; then
         if [ -f ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice ]; then
 			sed -e '/{{DOCUMENT_SERVER_HOST_ADDR}}/ s/#//' -i ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice
             sed 's,{{DOCUMENT_SERVER_HOST_ADDR}},'"${DOCUMENT_SERVER_PROTOCOL}:\/\/${DOCUMENT_SERVER_HOST}"',' -i ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice
-        fi
+        else
+			sed -e '/{{DOCUMENT_SERVER_HOST_ADDR}}/ s/#//' -i /etc/nginx/sites-enabled/onlyoffice
+            sed 's,{{DOCUMENT_SERVER_HOST_ADDR}},'"${DOCUMENT_SERVER_PROTOCOL}:\/\/${DOCUMENT_SERVER_HOST}"',' -i /etc/nginx/sites-enabled/onlyoffice
+			service nginx reload
+		fi
 
         for serverID in $(seq 1 ${ONLYOFFICE_MONOSERVE_COUNT});
         do
