@@ -63,6 +63,6 @@ if [ "${DOCUMENT_SERVER_ENABLED}" == "true" ]; then
     redis-cli  PUBLISH asc:channel:ASC.Web.Core.Files.DocServiceUrl "{\"CacheId\":\"140ab4e4-17d0-47dd-ba64-91f09bf20a72\",\"Object\":{\"Data\":{$RedisData}},\"Action\":7}"
 else
  if [ -f ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice ]; then
-	sed -e '/{{DOCUMENT_SERVER_HOST_ADDR}}/ s/^#*/#/' -i /app/onlyoffice/setup/config/nginx/onlyoffice
+	sed -e '/{{DOCUMENT_SERVER_HOST_ADDR}}/ s/^#*/#/' -i ${SYSCONF_TEMPLATES_DIR}/nginx/prepare-onlyoffice
  fi
 fi
