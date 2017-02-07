@@ -39,6 +39,7 @@ ADD config /app/onlyoffice/setup/config/
 ADD assets /app/onlyoffice/setup/assets/
 ADD run-community-server.sh /app/onlyoffice/run-community-server.sh
 ADD link-document-server.sh /app/onlyoffice/link-document-server.sh
+ADD link-mail-server.sh /app/onlyoffice/link-mail-server.sh
 RUN chmod -R 755 /app/onlyoffice/*.sh
 
 VOLUME ["/var/log/onlyoffice"]
