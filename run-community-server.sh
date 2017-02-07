@@ -575,3 +575,5 @@ if [ "${ONLYOFFICE_MODE}" == "SERVER" ]; then
 		echo "FINISH";
 	fi
 fi
+
+exec tail -f /dev/null

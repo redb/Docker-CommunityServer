@@ -35,11 +35,9 @@ RUN echo "${SOURCE_REPO_URL}" >> /etc/apt/sources.list && \
     rm -rf /var/lib/apt/lists/*
 
 
-ADD config /app/onlyoffice/setup/config/
-ADD assets /app/onlyoffice/setup/assets/
-ADD run-community-server.sh /app/onlyoffice/run-community-server.sh
-ADD link-document-server.sh /app/onlyoffice/link-document-server.sh
-ADD link-mail-server.sh /app/onlyoffice/link-mail-server.sh
+COPY config /app/onlyoffice/setup/config/
+COPY assets /app/onlyoffice/setup/assets/
+COPY *.sh /app/onlyoffice/
 RUN chmod -R 755 /app/onlyoffice/*.sh
 
 VOLUME ["/var/log/onlyoffice"]
@@ -48,5 +46,6 @@ VOLUME ["/var/lib/mysql"]
 
 EXPOSE 80 443 5222 3306 9865 9888 9866 9871 9882 5280
 
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-CMD exec dumb-init bash --rcfile /app/onlyoffice/run-community-server.sh -i;
+CMD ["/app/onlyoffice/run-community-server.sh"];
